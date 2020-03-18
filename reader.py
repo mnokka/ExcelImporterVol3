@@ -1,10 +1,7 @@
 #encoding=latin1
 
-# POC tool to read Excel using Python
-# Data will be used to create subtasks / add attachments to Jira main issues
-# Created either via this tool or Excel import plugin
-# 
-#
+# POC tool to read Excel(s) and files using Python 
+# Data will be used to create main and subtasks / add attachments to Jira main issues
 #
 # Author mika.nokka1@gmail.com 
 #
@@ -26,16 +23,17 @@ from sqlalchemy.sql.expression import false
 import re
 import time
 import os
- 
-__version__ = "0.1.1396"
 
 
+######################################################################################
+#CONFIGURATIONS
+__version__ = "0.1.1397"
+#
+# FOR CODE EMBEDDED  SETTINGS ====>  SEE Parse FUNCTION
+#
 logging.basicConfig(level=logging.INFO) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
-
 start = time.clock()
-
-
-#FOR CONFIGURATIONS, SEE Parse FUNCTION
+#######################################################################################
 
 def main(argv):
     
@@ -104,12 +102,14 @@ def main(argv):
 
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
     
-    # CONFIGURATIONS ##################################################################
-    PROD=True #True   #false skips issue creation and other jira operations
-    ATTACHMENTS=True    #True   #false skips attachment addition operations
+    ####################################################################################
+    # CONFIGURATIONS ####
+    PROD=False #True   #false skips issue creation and other jira operations
+    ATTACHMENTS=False    #True   #false skips attachment addition operations
     ENV="PROD" # or "PROD" or "DEV", sets the custom field IDs 
     AUTH=True # so jira authorizations
     # END OF CONFIGURATIONS ############################################################
+    
     IMPORT=False
     
     logging.info ("Filepath: %s     Filename:%s" %(filepath ,filename))
@@ -147,9 +147,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
 
 
 
-    ########################################
+    ##############################################################################
     #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS, both main and subtask excel
-    # If now subtask description, it is sma as main task one (excample C column)
+    # If nw subtask description, it is same as main task one (excample C column)
+    #
     DATASTARTSROW=5 # data section starting line MAIN TASKS EXCEL
     DATASTARTSROWSUB=5 # data section starting line SUB TASKS EXCEL
     B=2 #Key (inspectionnumber NW)
@@ -206,7 +207,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
   
     
     ##############################################################################################
-    #Go through main excel sheet for main issue keys (and contents findings)
+    # Go through main excel sheet for main issue keys (and contents findings)
     # Create dictionary structure (remarks)
     # NOTE: Uses hardcoded sheet/column values
     # NOTE: As this handles first sheet, using used row/cell reading (buggy, works only for first sheet) 
