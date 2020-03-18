@@ -110,6 +110,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     AUTH=True # so jira authorizations
     # END OF CONFIGURATIONS ############################################################
     
+    # flag to indicate whether issue under operations have been allready create to Jira
     IMPORT=False
     
     logging.info ("Filepath: %s     Filename:%s" %(filepath ,filename))
@@ -169,7 +170,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     SUB_H=8 #REporter NW
     I=9 #  Responsible NW (orignal Responsible)
     SUB_I=9 # Created
-    J=10 # Responsbile as a Jira user
+    J=10 # Responsbile as a Jira user NOT IN USE
     SUB_J=10 # Description
     K=11 #Inspection date, format: 1.11.2018  0:00:00    system number, subtasks excel
     SUB_K=11 # Ship Number   
@@ -177,7 +178,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     SUB_L=12 #System Number NW
     M=13 #System Number NW (original one)
     SUB_M=13 #Performer
-    N=14 #System   can be not set
+    N=14 #System   can be not set NOT I USE
     SUB_N=14 #Responsible NW
     SUB_O=15 #Assignee (jira username)
     #SUB_P=16 #Assignee (jira username)
@@ -193,14 +194,14 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     SUB_U=21 #BlockNW
     V=22 #DepartmentNW  (original)
     SUB_V=22 #Deck NW
-    W=23 #Department 
+    W=23 #Department NOT IN USE
     #SUB_W=23 # Deck NW
     X=24 # Topology  --> add to description
-    Y=25 # Area
-    Z=26 #Surveyor
-    AA=27 #DeckNW
-    AB=28 #Block NW
-    AC=29 #Firezone NW
+    Y=25 # Area NOT IN USE
+    Z=26 #Surveyor NOT IN USE
+    AA=27 #DeckNW NOT IN USE
+    AB=28 #Block NW NOT IN USE
+    AC=29 #Firezone NW NOT IN USE
     
     
 
@@ -234,16 +235,33 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             ISSUE_TYPENW=(CurrentSheet.cell(row=i, column=D).value)
             Issues[KEY]["ISSUE_TYPENW"] = ISSUE_TYPENW
             
-            ISSUE_TYPE=(CurrentSheet.cell(row=i, column=E).value)
+            # hardcoded issue mappings as missing in excel
+            #ISSUE_TYPE=(CurrentSheet.cell(row=i, column=E).value)
+            #Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
+            if (ISSUE_TYPENW=="Steel" or ISSUE_TYPENW=="ND Coatings" or ISSUE_TYPENW=="Tightness Test" or ISSUE_TYPENW=="Tank" or ISSUE_TYPENW=="Preservation"):
+                ISSUE_TYPE="Hull Inspection"
+            elif (ISSUE_TYPENW=="Outfitting" or ISSUE_TYPENW=="Penetration" or ISSUE_TYPENW=="Insulation" or ISSUE_TYPENW=="Engineering" or ISSUE_TYPENW=="Pipes" or ISSUE_TYPENW=="HVAC" or ISSUE_TYPENW=="LNG"):
+                ISSUE_TYPE="Outfitting Inspection"
+            else:
+                logging.error ("ERROR: No type match for NW issue:{0}. Forcing type!!".format(ISSUE_TYPENW))
+                ISSUE_TYPE="Hull Inspection" 
             Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
             
             STATUSNW=(CurrentSheet.cell(row=i, column=F).value)
             Issues[KEY]["STATUSNW"] = STATUSNW
             
           
-            
-            STATUS=(CurrentSheet.cell(row=i, column=G).value)
-            Issues[KEY]["STATUS"] = STATUS
+            #hadrcoded status mappings as missing in excel
+            #STATUS=(CurrentSheet.cell(row=i, column=G).value)
+            #Issues[KEY]["STATUS"] = STATUS
+            if (STATUSNW=="done"):
+                STATUS="Closed"
+            elif (STATUSNW=="Re-Inspection done"):
+                STATUS="Inspected"
+            else:
+                logging.error ("ERROR: No status match for NW issue:{0}. Forcing type!!".format(ISSUE_TYPENW))
+                STATUS="Closed"   
+            Issues[KEY]["STATUS"] = STATUS   
             
             PRIORITY=(CurrentSheet.cell(row=i, column=H).value)
             if not PRIORITY:
@@ -254,7 +272,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             Issues[KEY]["RESPONSIBLENW"] = RESPONSIBLENW
             
             
-            RESPONSIBLE=(CurrentSheet.cell(row=i, column=J).value)
+            # not in excel, using some user
+            #RESPONSIBLE=(CurrentSheet.cell(row=i, column=J).value)
+            RESPONSIBLE="torvla10"
             Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE
             
             CREATED=(CurrentSheet.cell(row=i, column=K).value) #Inspection date
@@ -284,7 +304,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             DEPARTMENTNW=(CurrentSheet.cell(row=i, column=V).value)
             Issues[KEY]["DEPARTMENTNW"] = DEPARTMENTNW
             
-            DEPARTMENT=(CurrentSheet.cell(row=i, column=W).value)
+            #NOT IN EEXCEL, using some random value
+            #DEPARTMENT=(CurrentSheet.cell(row=i, column=W).value)
+            DEPARTMENT="460 Hull Assembly"
             Issues[KEY]["DEPARTMENT"] = DEPARTMENT
             
                 
@@ -295,19 +317,29 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             Issues[KEY]["TOPOLOGY"] = TOPOLOGY
             
             
-            AREA=(CurrentSheet.cell(row=i, column=Y).value)
+            #NOT IN EXCEL
+            #AREA=(CurrentSheet.cell(row=i, column=Y).value)
+            AREA="NA"
             Issues[KEY]["AREA"] = AREA
             
-            SURVEYOR=(CurrentSheet.cell(row=i, column=Z).value)
+            #NOT IN EXCEL
+            #SURVEYOR=(CurrentSheet.cell(row=i, column=Z).value)
+            SURVEYOR="NA"
             Issues[KEY]["SURVEYOR"] = SURVEYOR
             
-            DECKNW=(CurrentSheet.cell(row=i, column=AA).value)
+            #NOT IN EXCEL
+            #DECKNW=(CurrentSheet.cell(row=i, column=AA).value)
+            DECKNW="NA"
             Issues[KEY]["DECKNW"] = DECKNW
             
-            BLOCKNW=(CurrentSheet.cell(row=i, column=AB).value)
+            #NOT IN EXCEL
+            #BLOCKNW=(CurrentSheet.cell(row=i, column=AB).value)
+            BLOCKNW="NA"
             Issues[KEY]["BLOCKNW"] = BLOCKNW
             
-            FIREZONENW=(CurrentSheet.cell(row=i, column=AC).value)
+            #NOT IN EXCEL
+            #FIREZONENW=(CurrentSheet.cell(row=i, column=AC).value)
+            FIREZONENW="NA"
             Issues[KEY]["FIREZONENW"] = FIREZONENW
             
             
@@ -323,7 +355,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
     #print Issues
     #print Issues.items() 
-    #print(json.dumps(Issues, indent=4, sort_keys=True))
+    print(json.dumps(Issues, indent=4, sort_keys=True))
     
     #key=18503 # check if this key exists
     #if key in Issues:
@@ -333,8 +365,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     #for key, value in Issues.iteritems() :
     #    print key, value
 
-    #print "EXITNG NOW!"
-    #sys.exit(5)
+    print "EXITING NOW!"
+    sys.exit(5)
     
 
     ############################################################################################################################
