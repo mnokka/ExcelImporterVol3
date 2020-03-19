@@ -161,26 +161,26 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     D=4 #Issue Type NW (oroginal)
     SUB_D=4
     E=5 #Issue Type
-    SUB_E=5
+    SUB_E=5 # NOT IN USE
     F=6 #Status NW (orginal status) 
     SUB_F=6
     G=7 #Status(manually mapped status to current system)
-    SUB_G=7
+    SUB_G=7 # NOT IN USE
     H=8 # Priority
-    SUB_H=8 #REporter NW
+    SUB_H=8 #REporter NW xxx
     I=9 #  Responsible NW (orignal Responsible)
-    SUB_I=9 # Created
+    SUB_I=9 # Created xxx
     J=10 # Responsbile as a Jira user NOT IN USE
-    SUB_J=10 # Description
+    SUB_J=10 # Description xxx
     K=11 #Inspection date, format: 1.11.2018  0:00:00    system number, subtasks excel
-    SUB_K=11 # Ship Number   
+    SUB_K=11 # Ship Number   xxxx
     L=12 #ShipNumber 
-    SUB_L=12 #System Number NW
+    SUB_L=12 #System Number NW xxxx
     M=13 #System Number NW (original one)
-    SUB_M=13 #Performer
+    SUB_M=13 #Performer  xx
     N=14 #System   can be not set NOT I USE
-    SUB_N=14 #Responsible NW
-    SUB_O=15 #Assignee (jira username)
+    SUB_N=14 #Responsible NW xxx
+    SUB_O=15 #Assignee (jira username) xxxx NO IN EXCEL
     #SUB_P=16 #Assignee (jira username)
     Q=17 #Performer NW
     # P=16 #PerformerNW
@@ -188,12 +188,12 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     #R=18 #Responsible ,subtask excel
     #U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
     
-    SUB_R=18  #Ijnspection Data and Time
-    SUB_S=19  #Department NW
-    SUB_T=20 # Department
-    SUB_U=21 #BlockNW
+    SUB_R=18  #Ijnspection Data and Time xxxx
+    SUB_S=19  #Department NW xxx
+    SUB_T=20 # Department NO IN EXCELxxx
+    SUB_U=21 #BlockNW xxx
     V=22 #DepartmentNW  (original)
-    SUB_V=22 #Deck NW
+    SUB_V=22 #Deck NW xxx
     W=23 #Department NOT IN USE
     #SUB_W=23 # Deck NW
     X=24 # Topology  --> add to description
@@ -412,13 +412,33 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 SUBISSUE_TYPENW=(SubCurrentSheet.cell(row=i, column=SUB_D).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUE_TYPENW"] = SUBISSUE_TYPENW
                 
-                SUBISSUE_TYPE=(SubCurrentSheet.cell(row=i, column=SUB_E).value)
+                
+                
+                # NOT IN EXCEL    
+                #SUBISSUE_TYPE=(SubCurrentSheet.cell(row=i, column=SUB_E).value)
+                PARENT_ISSUE_TYPE=Issues[PARENTKEY]["ISSUE_TYPE"] 
+                
+                if (PARENT_ISSUE_TYPE=="Outfitting Inspection"):
+                   SUBISSUE_TYPE = "Outfitting Remark"
+                elif (PARENT_ISSUE_TYPE=="Hull Inspection"):
+                   SUBISSUE_TYPE = "Hull Remark"
+                else logging.error ("ERROR: No type match for subissue:{0}. Forcing type!!".format(REMARKKEY))
+                    SUBISSUE_TYPE = "Hull Remark"
+              
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUE_TYPE"] = SUBISSUE_TYPE
+                
+                
+                
+                
+                
+                
                 
                 SUBSTATUSNW=(SubCurrentSheet.cell(row=i, column=SUB_F).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUSNW"] = SUBSTATUSNW
                 
-                SUBSTATUS=(SubCurrentSheet.cell(row=i, column=SUB_G).value)
+                # All Open in excel
+                #SUBSTATUS=(SubCurrentSheet.cell(row=i, column=SUB_G).value)
+                SUBSTATUS="Open"
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUS"] = SUBSTATUS
                 
                 
@@ -464,7 +484,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 SUBDEPARTMENTNW=(SubCurrentSheet.cell(row=i, column=SUB_S).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENTNW"] = SUBDEPARTMENTNW
                 
-                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=SUB_T).value)
+                # NO LOGIC TO SET, SETTING ONE RANDOM VALUE
+                #SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=SUB_T).value)
+                SUBDEPARTMENT="500 - Outfitting Common"
+                logging.error ("FORCING: Forcesetting subissue:{0}. Forcing deparmtment!!".format(SUBDEPARTMENT))
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENT"] = SUBDEPARTMENT
                 
                 
