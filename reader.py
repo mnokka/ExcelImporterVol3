@@ -373,9 +373,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     #for key, value in Issues.iteritems() :
     #    print key, value
 
-    print "EXITING NOW!"
-    sys.exit(5)
-    
 
     ############################################################################################################################
     # Check any remarks (subtasks) for main issue
@@ -730,7 +727,15 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             SUBCREATED=Remarks[subkey]["SUBCREATED"] 
             print "SUBCREATED:{0}".format(SUBCREATED)
             
-            SUBDESCRIPTION=Remarks[subkey]["DESCRIPTION"].encode('utf-8') 
+        
+        
+            
+            if (DESCRIPTION is None):
+                SUBDESCRIPTION=Remarks[subkey]["DESCRIPTION"] 
+            else:
+                SUBDESCRIPTION=Remarks[subkey]["DESCRIPTION"] #.string  #.encode('utf-8')  
+                SUBDESCRIPTION=unicode(SUBDESCRIPTION).encode('utf-8') 
+                
             print "SUBDESCRIPTION:{0}".format(SUBDESCRIPTION)
             
             SUBSHIPNUMBER=Remarks[subkey]["SHIPNUMBER"] 
