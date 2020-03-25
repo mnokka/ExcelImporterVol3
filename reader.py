@@ -120,11 +120,17 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     Issues=defaultdict(dict) 
 
     MainSheet="general_report" 
+    
+    #try:
     wb= openpyxl.load_workbook(files)
-    #types=type(wb)
-    #logging.debug ("Type:{0}".format(types))
-    #sheets=wb.get_sheet_names()
-    #logging.debug ("Sheets:{0}".format(sheets))
+    #except: 
+    #  logging.info ("ARGH Exception")
+       
+    types=type(wb)
+    logging.debug ("Type:{0}".format(types))
+    sheets=wb.get_sheet_names()
+    logging.debug ("Sheets:{0}".format(sheets))
+   
     CurrentSheet=wb[MainSheet] 
     #logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
     #logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
@@ -313,6 +319,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             TOPOLOGY=(CurrentSheet.cell(row=i, column=X).value)
             if TOPOLOGY:
                 DESCRIPTION="Topology ---->  "+TOPOLOGY
+            else:
+                DESCRIPTION="NA"    
             Issues[KEY]["DESCRIPTION"] = DESCRIPTION    
             Issues[KEY]["TOPOLOGY"] = TOPOLOGY
             
@@ -422,7 +430,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                    SUBISSUE_TYPE = "Outfitting Remark"
                 elif (PARENT_ISSUE_TYPE=="Hull Inspection"):
                    SUBISSUE_TYPE = "Hull Remark"
-                else logging.error ("ERROR: No type match for subissue:{0}. Forcing type!!".format(REMARKKEY))
+                else:
+                    logging.error ("ERROR: No type match for subissue:{0}. Forcing type!!".format(REMARKKEY))
                     SUBISSUE_TYPE = "Hull Remark"
               
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUE_TYPE"] = SUBISSUE_TYPE
