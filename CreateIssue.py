@@ -89,9 +89,12 @@ def main(argv):
 
 ####################################################################################
 def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW):
+    STATUS=STATUS
     jiraobj=jira
     project=JIRAPROJECT
 
+    
+    #print "==> ISSUETYPE:{0} PERFORMERNW:{1}".format(ISSUETYPE,PERFORMERNW)
     
     print "Creating issue for JIRA project: {0}".format(project)
     
@@ -113,6 +116,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
     }
 
     #status
+   # print "ISSUE DICT:{0}".format(issue_dict)
 
     try:
         new_issue = jiraobj.create_issue(fields=issue_dict)
@@ -135,6 +139,8 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
                 new_issue.update(notify=False,fields={"customfield_10049": {'name': RESPONSIBLE}})   
                 
             CustomFieldSetter(new_issue,"customfield_14608" ,DEPARTMENTNW)    
+            
+      
             CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
            
             CustomFieldSetter(new_issue,"customfield_14606" ,STATUSNW)  
@@ -150,11 +156,11 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
               
         elif (ENV =="PROD"):
             
-            print "Updating AREA"          
-            if (AREA is None):
-                new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
-            else:
-                new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})
+            print "NOT Updating AREA"          
+            #if (AREA is None):
+                #new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            #else:
+            #    new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})
          
             print "Updating RESPONSIBLE"    
             if (RESPONSIBLE is None):
@@ -163,8 +169,15 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
                 new_issue.update(notify=False,fields={"customfield_14430": {'name': RESPONSIBLE}})   
                 
             CustomFieldSetter(new_issue,"customfield_14606" ,DEPARTMENTNW)    
-            CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
+            
+            #print "NOT Updating DEPARTMENT"    
+            #if (DEPARTMENT is None):
+            #    new_issue.update(notify=False,fields={"customfield_10010": {"id": "-1"}})  # user selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            #else:
+            #    new_issue.update(notify=False,fields={"customfield_10010": {'name': DEPARTMENT}})  
+            #CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
            
+            print "Updating STATUSNW: {0} ".format(STATUSNW)
             CustomFieldSetter(new_issue,"customfield_14602" ,STATUSNW)  
             CustomFieldSetter(new_issue,"customfield_14613" ,SYSTEMNUMBERNW)       
                     
@@ -178,11 +191,11 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
        
     
     
-        print "Transit issue status"
+        print "Transit issue status ({0})".format(STATUS)
         
         
         
-        if (STATUS != "Todo"): # initial status after creation
+        if (STATUS != "Todo" and STATUS != "Open" and Status !="open"): # initial status after creation
             
             #map state to neede transit. Assunming WF supports thse transit (do for example admin only transit possibilty for migration)
             if (ENV=="DEV"):
@@ -195,6 +208,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
                     TRANSIT="AUTOMATION_CLOSED"
                 if (STATUS=="Inspected"):
                     TRANSIT="AUTOMATION_INSPECTED"
+                    
            
             
             print "Newstatus will be:{0}".format(STATUS)
@@ -235,6 +249,7 @@ def CustomFieldSetter(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE):
 # Quick way to create subtask
 #
 def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW):
+    STATUS=STATUS
     jiraobj=jira
     project=JIRAPROJECT
  
@@ -297,7 +312,9 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
                    
             CustomFieldSetter(new_issue,"customfield_14614" ,SUBISSUTYPENW)
             CustomFieldSetter(new_issue,"customfield_14602" ,SUBSTATUSNW) 
-            CustomFieldSetter(new_issue,"customfield_14613" ,SUBSYSTEMNUMBERNW)     
+            #if (SUBSYSTEMNUMBERNW==69):
+            #    print "WARNING 69 value error approaching"
+            CustomFieldSetter(new_issue,"customfield_14613" ,str(SUBSYSTEMNUMBERNW))     
             CustomFieldSetter(new_issue,"customfield_14606" ,SUBDEPARTMENTNW) 
             CustomFieldSetter(new_issue,"customfield_10010" ,SUBDEPARTMENT)
             CustomFieldSetter(new_issue,"customfield_14612" ,SUBBLOCKNW)

@@ -104,10 +104,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     
     ####################################################################################
     # CONFIGURATIONS ####
-    PROD=False #True   #false skips issue creation and other jira operations
-    ATTACHMENTS=False    #True   #false skips attachment addition operations
+    PROD=True # False #True   #false skips issue creation and other jira operations
+    ATTACHMENTS=True #  False    #True   #false skips attachment addition operations
     ENV="PROD" # or "PROD" or "DEV", sets the custom field IDs 
     AUTH=True # so jira authorizations
+    DRY="off" # on==dont do, just tell   off=do everything THIS IS THE ONE FLAG TO RULE THEM ALL
     # END OF CONFIGURATIONS ############################################################
     
     # flag to indicate whether issue under operations have been allready create to Jira
@@ -239,12 +240,14 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             Issues[KEY]["SUMMARY"] = SUMMARY
             
             ISSUE_TYPENW=(CurrentSheet.cell(row=i, column=D).value)
+            if (ISSUE_TYPENW=="Pipes" or str(ISSUE_TYPENW)=="Preservation"):
+                ISSUE_TYPENW="Steel"
             Issues[KEY]["ISSUE_TYPENW"] = ISSUE_TYPENW
             
             # hardcoded issue mappings as missing in excel
             #ISSUE_TYPE=(CurrentSheet.cell(row=i, column=E).value)
             #Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
-            if (ISSUE_TYPENW=="Steel" or ISSUE_TYPENW=="ND Coatings" or ISSUE_TYPENW=="Tightness Test" or ISSUE_TYPENW=="Tank" or ISSUE_TYPENW=="Preservation"):
+            if (ISSUE_TYPENW=="Steel" or ISSUE_TYPENW=="ND Coatings" or ISSUE_TYPENW=="Tightness Test" or ISSUE_TYPENW=="Tank" or str(ISSUE_TYPENW)=="Preservation"):
                 ISSUE_TYPE="Hull Inspection"
             elif (ISSUE_TYPENW=="Outfitting" or ISSUE_TYPENW=="Penetration" or ISSUE_TYPENW=="Insulation" or ISSUE_TYPENW=="Engineering" or ISSUE_TYPENW=="Pipes" or ISSUE_TYPENW=="HVAC" or ISSUE_TYPENW=="LNG"):
                 ISSUE_TYPE="Outfitting Inspection"
@@ -253,25 +256,33 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 ISSUE_TYPE="Hull Inspection" 
             Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
             
-            STATUSNW=(CurrentSheet.cell(row=i, column=F).value)
-            Issues[KEY]["STATUSNW"] = STATUSNW
+            #STATUSNW=(CurrentSheet.cell(row=i, column=F).value)
+            #if (STATUSNW is None):
+            #   STATUSNW=""
+            #Issues[KEY]["STATUSNW"] = STATUSNW
             
           
             #hadrcoded status mappings as missing in excel
             #STATUS=(CurrentSheet.cell(row=i, column=G).value)
-            #Issues[KEY]["STATUS"] = STATUS
+            STATUS="Open"
+            Issues[KEY]["STATUS"] = STATUS
+            
+            STATUSNW=(CurrentSheet.cell(row=i, column=F).value)
             if (STATUSNW=="done"):
-                STATUS="Closed"
+                STATUSNW="closed"
+                print "Forced done --> closed"
             elif (STATUSNW=="Re-Inspection done"):
-                STATUS="Inspected"
+                STATUSNW="open"
+                print "Forced Re-Inspection done --> open"
             else:
                 logging.error ("ERROR: No status match for NW issue:{0}. Forcing type!!".format(ISSUE_TYPENW))
-                STATUS="Closed"   
-            Issues[KEY]["STATUS"] = STATUS   
+                STATUSNW="closed"   
+            Issues[KEY]["STATUSNW"] = STATUSNW   
+            #Issues[KEY]["STATUS"] = STATUS   
             
             PRIORITY=(CurrentSheet.cell(row=i, column=H).value)
             if not PRIORITY:
-                SUMMARY="Major"  # force set, all should be major
+                PRIORITY="Major"  # force set, all should be major
             Issues[KEY]["PRIORITY"] = PRIORITY
             
             RESPONSIBLENW=(CurrentSheet.cell(row=i, column=I).value)
@@ -312,7 +323,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             #NOT IN EEXCEL, using some random value
             #DEPARTMENT=(CurrentSheet.cell(row=i, column=W).value)
-            DEPARTMENT="460 Hull Assembly"
+            DEPARTMENT="460 - Hull Assembly"
+            #DEPARTMENT="-1"
             Issues[KEY]["DEPARTMENT"] = DEPARTMENT
             
                 
@@ -337,17 +349,17 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             #NOT IN EXCEL
             #DECKNW=(CurrentSheet.cell(row=i, column=AA).value)
-            DECKNW="NA"
+            DECKNW=None
             Issues[KEY]["DECKNW"] = DECKNW
             
             #NOT IN EXCEL
             #BLOCKNW=(CurrentSheet.cell(row=i, column=AB).value)
-            BLOCKNW="NA"
+            BLOCKNW=None
             Issues[KEY]["BLOCKNW"] = BLOCKNW
             
             #NOT IN EXCEL
             #FIREZONENW=(CurrentSheet.cell(row=i, column=AC).value)
-            FIREZONENW="NA"
+            FIREZONENW=None
             Issues[KEY]["FIREZONENW"] = FIREZONENW
             
             
@@ -438,8 +450,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 
                 
                 
-                
+                     
+            
                 SUBSTATUSNW=(SubCurrentSheet.cell(row=i, column=SUB_F).value)
+                if (SUBSTATUSNW is None):
+                    SUBSTATUSNW="open"
+                elif (SUBSTATUSNW =="done"): #remap changed Jira states (drop down values)                   
+                     SUBSTATUSNW="closed"   
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUSNW"] = SUBSTATUSNW
                 
                 # All Open in excel
@@ -576,6 +593,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         ISSUETYPENW=(Issues[key]["ISSUE_TYPENW"])
         if (ISSUETYPENW is None):
              ISSUETYPENW=(Issues[key]["ISSUE_TYPENW"]) #to keep None object??
+        elif (ISSUETYPENW=="HVAC"):
+             ISSUETYPENW="Steel"
+        elif (ISSUETYPENW=="LNG"):
+              ISSUETYPENW="Steel"
+        elif (str(ISSUETYPENW)=="Preservation"):
+             ISSUTYPENW="Steel"
+                
         else: 
             ISSUETYPENW=str((Issues[key]["ISSUE_TYPENW"]).encode('utf-8'))  # str casting needed
        
@@ -657,16 +681,27 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         #IssueID="SHIP-1826" #temp ID
         if (PROD==True):
             if (IMPORT==True):
-                IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
-                print "Created issue:{0}  OK".format(IssueID)
-                print "-----------------------------------------------------------"
-                time.sleep(0.1) 
-                if (ATTACHMENTS==True):
-                    HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira)
+                if (DRY=="off"):
+                   IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
+                   print "Created issue:{0}  OK".format(IssueID)
+                   print "-----------------------------------------------------------"
+                   time.sleep(0.1) 
+                
+                
+                   if (ATTACHMENTS==True):
+                       DRY="off"
+                       HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira,DRY)
+                
+                elif (DRY=="on"):       
+                    print "Dryrun mode: I would have Created issue "
+                    IssueID="NOTREAL-007"
+                    DRY="on"
+                    HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira,DRY)  # dangezone!!
+                    print "-----------------------------------------------------------"
                 else:
-                    print "Skipped attachments operation, check internal configs"
+                    print "CONFUSED: Skipped attachments operation, check internal configs"
         
-            #sys.exit(1)
+            #sys.exit(1) 
             #print "IssueKey:{0}".format(IssueID.key)
             else:
                 print "Issue exists in Jira. Did nothing"
@@ -710,8 +745,15 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             SUBSUMMARY=(SUBSUMMARY.encode('utf-8')) 
             print "SUBSUMMARY:{0}".format(SUBSUMMARY)
             
+        
+            
             SUBISSUTYPENW=Remarks[subkey]["ISSUE_TYPENW"] 
+            if (SUBISSUTYPENW=="Preservation"):
+                SUBISSUTYPENW="Steel"
+                print "Forcing Subissutype Preservation as Steel"
             print "SUBISSUTYPENW:{0}".format(SUBISSUTYPENW)
+           
+            
             SUBISSUTYPE=Remarks[subkey]["ISSUE_TYPE"] 
             print "SUBISSUTYPE:{0}".format(SUBISSUTYPE)
             
@@ -771,11 +813,18 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             print ".................................."
             if (PROD==True):
                 if (IMPORT==True):
-                    SubIssueID=CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
-                    print "Created subtask:{0}".format(SubIssueID)
-                    time.sleep(0.1)
-                #print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
-                print "Issue exists in Jira. Did no subtask operations"
+                   if (DRY=="off"):
+                   #if (IMPORT==True):
+                       SubIssueID=CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
+                       print "Created subtask:{0}".format(SubIssueID)
+                       time.sleep(0.1)
+                   #print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"                  
+                   elif (DRY=="on"):
+                       print "DRYRUN mode: I would have created subtask"
+                   else:
+                       print "Confused: Is this DRY run or not???"    
+                else:   
+                   print "Issue exists in Jira. Did no subtask operations"
             else:
                 print "Skipped subtask creation"
         
@@ -789,7 +838,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
 #############################################################################
 
-def HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira):
+def HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira,DRY):
         filesx=ATTACHDIR+"/*_No{0}_*".format(key)
         filesz=ATTACHDIR+"/*-Nr. {0}.*".format(key)
         print "************** ATTACHMENT OPERATION ************************"
@@ -842,15 +891,20 @@ def HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira):
 
         if (len(tobeadded) > 0):
             for i in tobeadded:
-                print "Adding attachment-->{0}".format(i)
-                #print "ADD ATTACHMENT TO JIR ACOMMANDF AND DELAY HERE" 
-                try:
-                    jira.add_attachment(issue=IssueID, attachment=i)
-                    time.sleep(1) #needed ?
-                except Exception,e:
-                    print("Failed wtih UPDATE JIRA object, error: %s" % e)
-                    print "Issue was:{0}".format(IssueID)
-                    sys.exit(1)
+                
+                if (DRY=="on"):
+                    print "Dryrun ,simulating: Adding attachment-->{0}".format(i)
+                    #print "ADD ATTACHMENT TO JIR ACOMMANDF AND DELAY HERE" 
+                elif (DRY=="off"):
+                    try:
+                       jira.add_attachment(issue=IssueID, attachment=i)
+                       time.sleep(1) #needed ?
+                    except Exception,e:
+                       print("Failed with UPDATE JIRA object, error: %s" % e)
+                       print "Issue was:{0}".format(IssueID)
+                       sys.exit(1)
+                else:
+                    print "CONFUSED: If this DRY run or not???"       
         else:
             print "No attachments found"
             
