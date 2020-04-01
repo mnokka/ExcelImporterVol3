@@ -184,7 +184,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
             CustomFieldSetter(new_issue,"customfield_14614" ,ISSUETYPENW)
             CustomFieldSetter(new_issue,"customfield_14612" ,BLOCKNW)
             
-            CustomFieldSetter(new_issue,"customfield_14610" ,DECKNW)
+            CustomFieldSetter(new_issue,"customfield_14610" ,str(DECKNW))
             CustomFieldSetter(new_issue,"customfield_14611" ,FIREZONENW)
             
     
@@ -249,7 +249,7 @@ def CustomFieldSetter(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE):
 # Quick way to create subtask
 #
 def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW):
-    STATUS=STATUS
+    #STATUS=STATUS
     jiraobj=jira
     project=JIRAPROJECT
  
@@ -318,7 +318,7 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
             CustomFieldSetter(new_issue,"customfield_14606" ,SUBDEPARTMENTNW) 
             CustomFieldSetter(new_issue,"customfield_10010" ,SUBDEPARTMENT)
             CustomFieldSetter(new_issue,"customfield_14612" ,SUBBLOCKNW)
-            CustomFieldSetter(new_issue,"customfield_14610" ,SUBDECKNW)
+            CustomFieldSetter(new_issue,"customfield_14610" ,str(SUBDECKNW))
             
     
        
@@ -353,7 +353,7 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
             print "===> Executing transit:{0}".format(TRANSIT)
             jiraobj.transition_issue(new_issue, transition=TRANSIT)  # trantsit to state where it was in excel
         else:
-            print "Initial status found: {0}, nothing done".format(STATUS)
+            print "Initial status found: {0}, nothing done".format(SUBSTATUS)
     
 
 

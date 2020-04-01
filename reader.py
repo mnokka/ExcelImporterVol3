@@ -751,6 +751,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             if (SUBISSUTYPENW=="Preservation"):
                 SUBISSUTYPENW="Steel"
                 print "Forcing Subissutype Preservation as Steel"
+            elif (SUBISSUTYPENW=="HVAC"):
+                SUBISSUTYPENW="Steel"
+                print "Forcing Subissutype HVAC as Steel"   
             print "SUBISSUTYPENW:{0}".format(SUBISSUTYPENW)
            
             
