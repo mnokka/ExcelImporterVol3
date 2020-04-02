@@ -659,6 +659,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         DECKNW=(Issues[key]["DECKNW"])
         if (DECKNW is None):
             DECKNW=Issues[key]["DECKNW"] #to keep None object??
+            DECKNW="1" # just set some random default value
         else: 
             DECKNW=str((Issues[key]["DECKNW"]))  # str casting needed
         print "DECKNW:{0}".format(DECKNW) 
