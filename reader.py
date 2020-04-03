@@ -518,6 +518,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["BLOCKNW"] = SUBBLOCKNW
                 
                 SUBDECKNW=(SubCurrentSheet.cell(row=i, column=SUB_V).value)
+                if (SUBDECKNW is None):
+                    SUBDECKNW="1"
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECKNW"] = SUBDECKNW
                 #SUBTASKID=REMARKKEY
             
@@ -754,7 +756,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 print "Forcing Subissutype Preservation as Steel"
             elif (SUBISSUTYPENW=="HVAC"):
                 SUBISSUTYPENW="Steel"
-                print "Forcing Subissutype HVAC as Steel"   
+                print "Forcing Subissutype HVAC as Steel"
+            elif (SUBISSUTYPENW=="Pipes"):
+                SUBISSUTYPENW="Steel"
+                print "Forcing Subissutype Pipes as Steel"         
             print "SUBISSUTYPENW:{0}".format(SUBISSUTYPENW)
            
             

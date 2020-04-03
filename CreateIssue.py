@@ -233,7 +233,7 @@ def CustomFieldSetter(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE):
     try:
     
         print "Trying update issue:{0}, field:{1}, value:{2}".format(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE)
-        if (CUSTOMFIELDVALUE is None or not CUSTOMFIELDVALUE): # None or "nothing" cases
+        if (CUSTOMFIELDVALUE is None or (not CUSTOMFIELDVALUE)): # None or "nothing" cases
             new_issue.update(notify=False,fields={CUSTOMFIELDNAME: {"id": "-1"}})
             print "Customfieldsetter: setting -1"
         else:    
@@ -303,6 +303,11 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
             CustomFieldSetter(new_issue,"customfield_14608" ,SUBDEPARTMENTNW) 
             CustomFieldSetter(new_issue,"customfield_10010" ,SUBDEPARTMENT)
             CustomFieldSetter(new_issue,"customfield_14603" ,SUBBLOCKNW)
+        
+            if (SUBDECKNW is None):
+                new_issue.update(notify=False,fields={"customfield_14601":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            else:
+                new_issue.update(notify=False,fields={"customfield_14601": [{"value": SUBDECKNW}]})
             CustomFieldSetter(new_issue,"customfield_14601" ,SUBDECKNW)
             
         elif (ENV =="PROD"):
